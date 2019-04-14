@@ -153,6 +153,6 @@ app.post("/api/justify", async (req, res) => {
 });
 
 // démarrage du serveur
-app.listen(PORT, () => {
+app.listen(process.env.PORT || PORT, () => {
   console.log("server started on port ", PORT);
 });
