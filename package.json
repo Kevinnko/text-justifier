@@ -4,7 +4,9 @@
   "description": "",
   "main": "justify-api.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
@@ -16,5 +18,6 @@
     "moment-timezone": "^0.5.23",
     "mongoose": "^5.5.0",
     "uid2": "0.0.3"
-  }
+  },
+  "heroku-run-build-script": true
 }
