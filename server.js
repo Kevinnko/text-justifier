@@ -16,18 +16,14 @@ mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost/justify-api", {
   useNewUrlParser: true
 });
 
-// tableau de phrases vides
-let sentences = [];
-
-// phrase vide
-let sentence = "";
-
 // Nombre de caractères par ligne
 const limit = 80;
 
-// fonction qui reçoit une string et qui l'ajoute au tableau de phrases `sentences` et qui remet la variable `sentence` à vide
+// fonction qui reçoit une ligne, la met à 80 caractères, puis la retourne
 const newSentence = line => {
   line = line.trim();
+  // tableau de phrases vides
+  let formatedLine = [];
   if (line.length < limit) {
     const lineWords = line.trim().split(" ");
     let completedLine = [];
@@ -39,37 +35,43 @@ const newSentence = line => {
         completedLine.push(lineWords[i]);
       }
     }
-    sentences.push(completedLine.join(" "));
-    sentence = "";
+    formatedLine.push(completedLine.join(" "));
   } else {
-    sentences.push(line);
-    sentence = "";
+    formatedLine.push(line);
   }
+  return formatedLine;
 };
 
 // fonction qui ajoute chaque mot, petit à petit, dans la variable `sentence`, jusqu'à temps d'atteindre la limite imposée
 const justifiedParagraph = text => {
-  // tableau de mots, insérés un à un dans un tableau
   const words = text.split(" ");
+  // phrase vide qu'on remplira mot par mot
+  let sentence = "";
+  // tableau de phrases vides
+  let justifiedText = [];
+
   for (let i = 0; i < words.length; i++) {
     if (sentence.length + words[i].length < limit) {
       if (words[i].includes("\n")) {
         lineBreakTab = words[i].split(/[\r\n]+/);
         sentence += " " + lineBreakTab[0];
-        newSentence(sentence);
+        justifiedText.push(newSentence(sentence));
+        sentence = "";
         sentence += lineBreakTab[1];
       } else {
         sentence += " " + words[i];
       }
       if (i === words.length - 1) {
-        newSentence(sentence);
+        justifiedText.push(newSentence(sentence));
+        sentence = "";
       }
     } else {
-      newSentence(sentence);
+      justifiedText.push(newSentence(sentence));
+      sentence = "";
       i--;
     }
   }
-  return sentences.join("\n");
+  return justifiedText.join("\n");
 };
 
 // fonction qui réinitialise le compteur
@@ -121,25 +123,8 @@ app.post("/api/justify", async (req, res) => {
       await resetCounter(token);
     }
     sentences = []; // réinitialise le tableau de phrases à chaque appel
-    let wordCountTab = req.body
-      .split(/[\r\n]+/)
-      .join(" ")
-      .split(" ");
-    let wordCount = 0;
-    for (let i = 0; i < wordCountTab.length; i++) {
-      if (wordCountTab[i] !== " ") {
-        // console.log(wordCount);
-        wordCount++;
-      }
-    }
-    // let wordCount = req.body.length;
-    console.log(
-      "req body : ",
-      req.body
-        .split(/[\r\n]+/)
-        .join(" ")
-        .split(" ")
-    );
+    let wordCount = req.body.split(/[\r\n\" "]+/).length;
+
     const user = await User.findOne({ token: token });
     if (user) {
       if (user.counter === 80000) {
