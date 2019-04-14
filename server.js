@@ -89,6 +89,10 @@ const resetCounter = async token => {
 };
 
 // routes
+app.get("/", function(req, res) {
+  res.send("Welcome to Text Justifier API.");
+});
+
 app.post("/api/token", async (req, res) => {
   try {
     const token = uid2(64);
